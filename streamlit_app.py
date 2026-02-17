@@ -494,18 +494,15 @@ elif page == "📅 Meetings":
                     
                     edit_notes = st.text_area("Notes", value=m['notes'] or "", key=f"notes_{m['id']}")
                     
-                    col_btn1, col_btn2 = st.columns(2)
-                    with col_btn1:
-                        save_btn = st.form_submit_button("💾 Save Changes", width='stretch')
-                    with col_btn2:
-                        delete_btn = st.form_submit_button("🗑️ Delete", width='stretch', type="danger")
+                    save_btn = st.form_submit_button("💾 Save Changes", width='stretch')
                     
                     if save_btn:
                         update_meeting(m['id'], edit_name, edit_day, edit_time, edit_location, edit_format, edit_treasurer, edit_notes, edit_active)
                         st.success("Meeting updated!")
                         st.rerun()
                     
-                    if delete_btn:
+                    # Delete button outside form (can't have two submit buttons in one form)
+                    if st.button("🗑️ Delete Meeting", key=f"del_meeting_{m['id']}", type="danger"):
                         delete_meeting(m['id'])
                         st.success("Meeting deleted!")
                         st.rerun()
