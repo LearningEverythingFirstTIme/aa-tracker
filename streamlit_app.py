@@ -500,12 +500,12 @@ elif page == "📅 Meetings":
                         update_meeting(m['id'], edit_name, edit_day, edit_time, edit_location, edit_format, edit_treasurer, edit_notes, edit_active)
                         st.success("Meeting updated!")
                         st.rerun()
-                    
-                    # Delete button outside form (can't have two submit buttons in one form)
-                    if st.button("🗑️ Delete Meeting", key=f"del_meeting_{m['id']}", ):
-                        delete_meeting(m['id'])
-                        st.success("Meeting deleted!")
-                        st.rerun()
+                
+                # Delete button OUTSIDE the form
+                if st.button("🗑️ Delete Meeting", key=f"del_meeting_{m['id']}"):
+                    delete_meeting(m['id'])
+                    st.success("Meeting deleted!")
+                    st.rerun()
     else:
         st.info("No meetings yet. Add one above!")
 
