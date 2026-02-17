@@ -32,15 +32,39 @@ def check_password():
     
     st.markdown("""
     <style>
-        .login-container {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 30px;
-            background-color: #262730;
-            border-radius: 10px;
+        .login-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+        }
+        .login-card {
+            background: linear-gradient(145deg, rgba(45, 74, 62, 0.85), rgba(26, 47, 35, 0.95));
+            border: 1px solid rgba(122, 158, 135, 0.3);
+            border-radius: 24px;
+            padding: 3rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             text-align: center;
+            max-width: 380px;
+            width: 90%;
+        }
+        .login-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
         }
     </style>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-icon">🍀</div>
+            <h2 style="border:none; margin-bottom:0.5rem;">AA Tracker</h2>
+            <p style="color:var(--text-muted); margin-bottom:2rem;">One day at a time</p>
     """, unsafe_allow_html=True)
     
     st.title("🍀 AA Tracker")
@@ -62,97 +86,153 @@ def check_password():
 if not check_password():
     st.stop()
 
-# Custom dark theme CSS - Mobile responsive
+# Custom CSS - Organic Calm Aesthetic
 st.markdown("""
 <style>
-    .stApp {
-        background-color: #0e1117;
-        color: #fafafa;
-    }
-    .stSidebar {
-        background-color: #262730;
-    }
-    .stTextInput, .stNumberInput, .stSelectbox, .stDateInput, .stTimeInput {
-        background-color: #262730;
-    }
-    div[data-testid="stMetricValue"] {
-        font-size: 2rem;
-    }
-    .income {
-        color: #4ade80 !important;
-    }
-    .expense {
-        color: #f87171 !important;
-    }
-    .stButton>button {
-        background-color: #4ade80;
-        color: #0e1117;
-        font-weight: bold;
-    }
-    .stButton>button:hover {
-        background-color: #22c55e;
-    }
-    .stButton>button[kind="secondary"] {
-        background-color: #4a5568;
-        color: #fafafa;
-    }
-    .stButton>button[kind="secondary"]:hover {
-        background-color: #2d3748;
-    }
-    .stButton>button[kind="danger"] {
-        background-color: #f87171;
-        color: #0e1117;
-    }
-    .css-1d391kg {
-        padding-top: 1rem;
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Nunito+Sans:wght@300;400;500;600&display=swap');
+    
+    :root {
+        --forest-deep: #1a2f23;
+        --forest-mid: #2d4a3e;
+        --forest-light: #3d6b54;
+        --sage: #7a9e87;
+        --cream: #f5f2eb;
+        --amber: #d4a853;
+        --amber-glow: #e8c078;
+        --text-light: #f5f2eb;
+        --text-muted: #a8b5ad;
+        --danger: #c45c5c;
+        --success: #6b9e7a;
     }
     
-    /* Mobile: Hide sidebar nav, show top nav instead */
-    @media (max-width: 768px) {
-        section[data-testid="stSidebar"] {
-            display: none !important;
-        }
-        .stRadio > div {
-            flex-direction: row !important;
-            flex-wrap: wrap !important;
-            justify-content: center;
-        }
-        div[data-testid="stRadio"] > div > label {
-            padding: 8px 12px !important;
-            margin: 4px !important;
-            font-size: 0.8rem !important;
-        }
-        div[data-testid="stMetric"] {
-            padding: 0.5rem !important;
-        }
-        div[data-testid="stMetricValue"] {
-            font-size: 1.2rem !important;
-        }
-        div[data-testid="stMetricLabel"] {
-            font-size: 0.8rem !important;
-        }
-        .stForm > div[data-testid="stFormRow"] {
-            flex-direction: column !important;
-            gap: 0.75rem !important;
-        }
-        .stButton > button {
-            min-height: 48px !important;
-            font-size: 1rem !important;
-            width: 100% !important;
-            margin-top: 0.5rem !important;
-        }
+    .stApp {
+        background: linear-gradient(165deg, var(--forest-deep) 0%, #152419 50%, #0f1a12 100%);
+        color: var(--text-light);
+        font-family: 'Nunito Sans', sans-serif;
+        min-height: 100vh;
     }
-    /* Quick Add section styling */
-    .quick-add-header {
-        font-size: 1.1rem;
+    
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        opacity: 0.03;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    h1, h2, h3, .stTitle {
+        font-family: 'Cormorant Garamond', Georgia, serif;
         font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--cream);
     }
-    /* Delete confirmation modal */
-    .delete-confirm {
-        background-color: #262730;
-        padding: 20px;
+    
+    h1 { font-size: 2.5rem; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+    h2 { font-size: 1.75rem; border-bottom: 1px solid rgba(212, 168, 83, 0.3); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+    
+    div[data-testid="stMetric"] {
+        background: linear-gradient(145deg, rgba(45, 74, 62, 0.6), rgba(26, 47, 35, 0.8));
+        border: 1px solid rgba(122, 158, 135, 0.2);
+        border-radius: 16px;
+        padding: 1.25rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    div[data-testid="stMetric"]:hover { transform: translateY(-2px); }
+    div[data-testid="stMetricValue"] { font-family: 'Cormorant Garamond', serif; font-size: 2.25rem; font-weight: 600; color: var(--cream); }
+    div[data-testid="stMetricLabel"] { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    
+    .stButton > button {
+        background: linear-gradient(145deg, var(--amber), var(--amber-glow));
+        color: var(--forest-deep);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-family: 'Nunito Sans', sans-serif;
+        font-weight: 600;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        transition: all 0.25s ease;
+    }
+    
+    .stButton > button:hover {
+        background: linear-gradient(145deg, var(--amber-glow), var(--amber));
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(212, 168, 83, 0.4);
+    }
+    
+    .stButton > button[kind="secondary"] {
+        background: linear-gradient(145deg, var(--forest-mid), var(--forest-light));
+        color: var(--text-light);
+        border: 1px solid rgba(122, 158, 135, 0.3);
+    }
+    
+    .stButton > button[kind="secondary"]:hover {
+        background: linear-gradient(145deg, var(--forest-light), var(--forest-mid));
+    }
+    
+    .stTextInput > div > div, .stNumberInput > div > div, .stSelectbox > div > div, .stDateInput > div > div {
+        background: rgba(26, 47, 35, 0.6);
+        border: 1px solid rgba(122, 158, 135, 0.3);
         border-radius: 10px;
-        border: 1px solid #f87171;
+        color: var(--text-light);
+    }
+    
+    .stRadio > div > label {
+        background: rgba(45, 74, 62, 0.4);
+        border: 1px solid rgba(122, 158, 135, 0.2);
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        color: var(--text-muted);
+        transition: all 0.25s ease;
+    }
+    
+    .stRadio > div > label:has(input:checked) {
+        background: linear-gradient(145deg, var(--amber), var(--amber-glow));
+        color: var(--forest-deep);
+        border-color: var(--amber);
+        font-weight: 600;
+        box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3);
+    }
+    
+    .streamlit-expanderHeader {
+        background: rgba(45, 74, 62, 0.4);
+        border: 1px solid rgba(122, 158, 135, 0.2);
+        border-radius: 12px;
+        color: var(--cream);
+    }
+    
+    .stDataFrame {
+        background: rgba(26, 47, 35, 0.4);
+        border: 1px solid rgba(122, 158, 135, 0.2);
+        border-radius: 12px;
+    }
+    
+    hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(212, 168, 83, 0.3), transparent); margin: 2rem 0; }
+    
+    .stSuccess { background: rgba(107, 158, 122, 0.2); border: 1px solid var(--success); border-radius: 10px; }
+    .stError { background: rgba(196, 92, 92, 0.2); border: 1px solid var(--danger); border-radius: 10px; }
+    
+    @media (max-width: 768px) {
+        h1 { font-size: 1.75rem; }
+        h2 { font-size: 1.35rem; }
+        div[data-testid="stMetricValue"] { font-size: 1.5rem; }
+    }
+    
+    .login-card {
+        background: linear-gradient(145deg, rgba(45, 74, 62, 0.8), rgba(26, 47, 35, 0.9));
+        border: 1px solid rgba(122, 158, 135, 0.3);
+        border-radius: 24px;
+        padding: 3rem;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -338,7 +418,7 @@ def add_category(name, cat_type, description):
 # Navigation
 pages = ["📊 Dashboard", "📅 Meetings", "✅ Check In", "📜 History", "💰 Treasury"]
 
-st.title("🍀 AA Tracker")
+st.markdown('<h1 style="text-align:center; margin-bottom:0.5rem;">🍀 AA Tracker</h1><p style="text-align:center; color:var(--text-muted); margin-bottom:2rem;">One day at a time</p>', unsafe_allow_html=True)
 
 # Create navigation
 page = st.radio(
