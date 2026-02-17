@@ -455,7 +455,7 @@ elif page == "📅 Meetings":
             
             notes = st.text_area("Notes (optional)")
             
-            submitted = st.form_submit_button("Add Meeting", use_container_width=True)
+            submitted = st.form_submit_button("Add Meeting", width='stretch')
             
             if submitted:
                 if name and time_val and location:
@@ -496,9 +496,9 @@ elif page == "📅 Meetings":
                     
                     col_btn1, col_btn2 = st.columns(2)
                     with col_btn1:
-                        save_btn = st.form_submit_button("💾 Save Changes", use_container_width=True)
+                        save_btn = st.form_submit_button("💾 Save Changes", width='stretch')
                     with col_btn2:
-                        delete_btn = st.form_submit_button("🗑️ Delete", use_container_width=True, type="danger")
+                        delete_btn = st.form_submit_button("🗑️ Delete", width='stretch', type="danger")
                     
                     if save_btn:
                         update_meeting(m['id'], edit_name, edit_day, edit_time, edit_location, edit_format, edit_treasurer, edit_notes, edit_active)
@@ -531,7 +531,7 @@ elif page == "✅ Check In":
             
             notes = st.text_area("Notes (optional)")
             
-            submitted = st.form_submit_button("✅ Check In", use_container_width=True)
+            submitted = st.form_submit_button("✅ Check In", width='stretch')
             
             if submitted:
                 add_attendance(meeting_id, date_val, role, notes)
@@ -615,7 +615,7 @@ elif page == "💰 Treasury":
             
             notes = st.text_area("Notes (optional)", key="treasury_notes")
             
-            submit_btn = st.form_submit_button("➕ Add Transaction", use_container_width=True)
+            submit_btn = st.form_submit_button("➕ Add Transaction", width='stretch')
             
             if submit_btn:
                 if amount > 0:
