@@ -285,13 +285,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Database setup
-DB_PATH = Path(__file__).parent / "aa_tracker.db"
+# Supabase configuration
+SUPABASE_URL = "https://qlkfubzlvgngbhnlecbk.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsa2Z1YnpsdmduZ2JobmxlY2JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNjU1OTksImV4cCI6MjA4Njk0MTU5OX0.M_Yi7hCCKtRLAO-11qr60FbhXK6JkXMPzRyLw5_xKAY"
 
-def get_db_connection():
-    """Get database connection"""
-    import sqlite3
-    return sqlite3.connect(DB_PATH)
+@st.cache_resource
+def get_supabase_client():
+    """Create Supabase client"""
+    from supabase import create_client
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
+
+supabase = get_supabase_client()
 
 def clear_cache():
     """Clear all cached data after modifications"""
@@ -302,166 +306,193 @@ def clear_cache():
     get_treasury_balance.clear()
     get_monthly_summary.clear()
 
-# Helper functions
+# Helper functions using Supabase
 @st.cache_data(ttl=60)
 def get_meetings(active_only=True):
-    """Get meetings from database"""
-    conn = get_db_connection()
-    if active_only:
-        df = pd.read_sql("SELECT * FROM meeting WHERE is_active = 1 ORDER BY day_of_week, time", conn)
-    else:
-        df = pd.read_sql("SELECT * FROM meeting ORDER BY day_of_week, time", conn)
-    conn.close()
-    return df
+    """Get meetings from Supabase"""
+    try:
+        query = supabase.table('meeting').select('*')
+        if active_only:
+            query = query.eq('is_active', True)
+        result = query.order('day_of_week').order('time').execute()
+        return pd.DataFrame(result.data) if result.data else pd.DataFrame()
+    except Exception as e:
+        st.error(f"Failed to load meetings: {e}")
+        return pd.DataFrame()
 
 @st.cache_data(ttl=60)
 def get_attendance(limit=200):
-    """Get attendance records"""
-    conn = get_db_connection()
-    df = pd.read_sql(f"""
-        SELECT a.id, a.date, a.role, a.notes, a.meeting_id,
-               m.name as meeting_name, m.day_of_week, m.time, m.location
-        FROM attendance a
-        JOIN meeting m ON a.meeting_id = m.id
-        ORDER BY a.date DESC, m.time
-        LIMIT {limit}
-    """, conn)
-    conn.close()
-    return df
+    """Get attendance records from Supabase"""
+    try:
+        result = supabase.table('attendance').select('id, date, role, notes, meeting_id').order('date', desc=True).limit(limit).execute()
+        df = pd.DataFrame(result.data) if result.data else pd.DataFrame()
+        if not df.empty:
+            # Get meeting info
+            meetings = get_meetings(active_only=False)
+            df = df.merge(meetings[['id', 'name', 'day_of_week', 'time', 'location']], left_on='meeting_id', right_on='id', how='left', suffixes=('', '_m'))
+            df = df.rename(columns={'name': 'meeting_name'})
+        return df
+    except Exception as e:
+        st.error(f"Failed to load attendance: {e}")
+        return pd.DataFrame()
 
 @st.cache_data(ttl=60)
 def get_categories(category_type=None):
-    """Get categories from database"""
-    conn = get_db_connection()
-    if category_type:
-        df = pd.read_sql(f"SELECT * FROM category WHERE type = '{category_type}' AND is_active = 1", conn)
-    else:
-        df = pd.read_sql("SELECT * FROM category WHERE is_active = 1", conn)
-    conn.close()
-    return df
+    """Get categories from Supabase"""
+    try:
+        query = supabase.table('category').select('*')
+        if category_type:
+            query = query.eq('type', category_type)
+        result = query.eq('is_active', True).execute()
+        return pd.DataFrame(result.data) if result.data else pd.DataFrame()
+    except Exception as e:
+        st.error(f"Failed to load categories: {e}")
+        return pd.DataFrame()
 
 @st.cache_data(ttl=60)
 def get_transactions(limit=100):
-    """Get treasury transactions"""
-    conn = get_db_connection()
-    df = pd.read_sql(f"""
-        SELECT t.id, t.date, t.amount, t.type, t.description, t.meeting_name, t.notes,
-               c.name as category, c.type as cat_type
-        FROM "transaction" t
-        LEFT JOIN category c ON t.category_id = c.id
-        ORDER BY t.date DESC, t.id DESC
-        LIMIT {limit}
-    """, conn)
-    conn.close()
-    return df
+    """Get treasury transactions from Supabase"""
+    try:
+        result = supabase.table('transaction').select('*').order('date', desc=True).order('id', desc=True).limit(limit).execute()
+        df = pd.DataFrame(result.data) if result.data else pd.DataFrame()
+        if not df.empty:
+            # Get category info
+            cats = get_categories()
+            df = df.merge(cats[['id', 'name', 'type']], left_on='category_id', right_on='id', how='left', suffixes=('', '_cat'))
+            df = df.rename(columns={'name': 'category_name', 'type_cat': 'cat_type'})
+        return df
+    except Exception as e:
+        st.error(f"Failed to load transactions: {e}")
+        return pd.DataFrame()
 
 @st.cache_data(ttl=60)
 def get_treasury_balance():
-    """Calculate total treasury balance"""
-    conn = get_db_connection()
-    df = pd.read_sql("""
-        SELECT 
-            SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income,
-            SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense
-        FROM "transaction"
-    """, conn)
-    conn.close()
-    income = df['total_income'].iloc[0] or 0
-    expense = df['total_expense'].iloc[0] or 0
-    return income - expense
+    """Calculate total treasury balance from Supabase"""
+    try:
+        result = supabase.table('transaction').select('type, amount').execute()
+        df = pd.DataFrame(result.data) if result.data else pd.DataFrame()
+        if df.empty:
+            return 0
+        income = df[df['type'] == 'income']['amount'].sum() or 0
+        expense = df[df['type'] == 'expense']['amount'].sum() or 0
+        return income - expense
+    except Exception as e:
+        st.error(f"Failed to load balance: {e}")
+        return 0
 
 @st.cache_data(ttl=60)
 def get_monthly_summary(year=None, month=None):
-    """Get monthly income/expense summary"""
-    conn = get_db_connection()
-    if year and month:
-        filter_str = f"WHERE strftime('%Y', date) = '{year}' AND strftime('%m', date) = '{month:02d}'"
-    else:
-        filter_str = ""
-    
-    df = pd.read_sql(f"""
-        SELECT 
-            SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income,
-            SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense
-        FROM "transaction"
-        {filter_str}
-    """, conn)
-    conn.close()
-    return df
+    """Get monthly income/expense summary from Supabase"""
+    try:
+        query = supabase.table('transaction').select('type, amount, date')
+        if year and month:
+            start_date = f"{year}-{month:02d}-01"
+            if month == 12:
+                end_date = f"{year+1}-01-01"
+            else:
+                end_date = f"{year}-{month+1:02d}-01"
+            query = query.gte('date', start_date).lt('date', end_date)
+        result = query.execute()
+        df = pd.DataFrame(result.data) if result.data else pd.DataFrame()
+        if df.empty:
+            return pd.DataFrame([{'total_income': 0, 'total_expense': 0}])
+        income = df[df['type'] == 'income']['amount'].sum() or 0
+        expense = df[df['type'] == 'expense']['amount'].sum() or 0
+        return pd.DataFrame([{'total_income': income, 'total_expense': expense}])
+    except Exception as e:
+        st.error(f"Failed to load summary: {e}")
+        return pd.DataFrame([{'total_income': 0, 'total_expense': 0}])
 
 # Database operations
 def add_meeting(name, day_of_week, time, location, format_type, is_treasurer_duty, notes):
-    """Add a new meeting"""
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("""INSERT INTO meeting (name, day_of_week, time, location, format_type, is_treasurer_duty, notes, is_active) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, 1)""",
-              (name, day_of_week, time, location, format_type, is_treasurer_duty, notes))
-    conn.commit()
-    conn.close()
-    clear_cache()
+    """Add a new meeting to Supabase"""
+    try:
+        supabase.table('meeting').insert({
+            'name': name,
+            'day_of_week': day_of_week,
+            'time': time,
+            'location': location,
+            'format_type': format_type,
+            'is_treasurer_duty': is_treasurer_duty,
+            'notes': notes
+        }).execute()
+        clear_cache()
+    except Exception as e:
+        st.error(f"Failed to add meeting: {e}")
 
 def update_meeting(meeting_id, name, day_of_week, time, location, format_type, is_treasurer_duty, notes, is_active):
-    """Update a meeting"""
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("""UPDATE meeting SET name=?, day_of_week=?, time=?, location=?, format_type=?, 
-                 is_treasurer_duty=?, notes=?, is_active=? WHERE id=?""",
-              (name, day_of_week, time, location, format_type, is_treasurer_duty, notes, is_active, meeting_id))
-    conn.commit()
-    conn.close()
-    clear_cache()
+    """Update a meeting in Supabase"""
+    try:
+        supabase.table('meeting').update({
+            'name': name,
+            'day_of_week': day_of_week,
+            'time': time,
+            'location': location,
+            'format_type': format_type,
+            'is_treasurer_duty': is_treasurer_duty,
+            'notes': notes,
+            'is_active': is_active
+        }).eq('id', meeting_id).execute()
+        clear_cache()
+    except Exception as e:
+        st.error(f"Failed to update meeting: {e}")
 
 def delete_meeting(meeting_id):
     """Delete (deactivate) a meeting"""
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("UPDATE meeting SET is_active = 0 WHERE id = ?", (meeting_id,))
-    conn.commit()
-    conn.close()
-    clear_cache()
+    try:
+        supabase.table('meeting').update({'is_active': False}).eq('id', meeting_id).execute()
+        clear_cache()
+    except Exception as e:
+        st.error(f"Failed to delete meeting: {e}")
 
 def add_attendance(meeting_id, date_val, role, notes):
-    """Record attendance"""
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("""INSERT INTO attendance (meeting_id, date, role, notes) 
-                 VALUES (?, ?, ?, ?)""",
-              (meeting_id, date_val, role, notes))
-    conn.commit()
-    conn.close()
-    clear_cache()
+    """Record attendance in Supabase"""
+    try:
+        supabase.table('attendance').insert({
+            'meeting_id': meeting_id,
+            'date': date_val.strftime('%Y-%m-%d') if hasattr(date_val, 'strftime') else str(date_val),
+            'role': role,
+            'notes': notes
+        }).execute()
+        clear_cache()
+    except Exception as e:
+        st.error(f"Failed to record attendance: {e}")
 
 def add_transaction(date_val, amount, category_id, tx_type, description, meeting_name, notes):
-    """Add a treasury transaction"""
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("""INSERT INTO "transaction" (date, amount, category_id, type, description, meeting_name, notes) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?)""",
-              (date_val, amount, category_id, tx_type, description, meeting_name, notes))
-    conn.commit()
-    conn.close()
-    clear_cache()
+    """Add treasury transaction to Supabase"""
+    try:
+        supabase.table('transaction').insert({
+            'date': date_val.strftime('%Y-%m-%d') if hasattr(date_val, 'strftime') else str(date_val),
+            'amount': amount,
+            'category_id': category_id,
+            'type': tx_type,
+            'description': description,
+            'meeting_name': meeting_name,
+            'notes': notes
+        }).execute()
+        clear_cache()
+    except Exception as e:
+        st.error(f"Failed to add transaction: {e}")
 
 def delete_transaction(tx_id):
     """Delete a transaction"""
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute('DELETE FROM "transaction" WHERE id = ?', (tx_id,))
-    conn.commit()
-    conn.close()
-    clear_cache()
+    try:
+        supabase.table('transaction').delete().eq('id', tx_id).execute()
+        clear_cache()
+    except Exception as e:
+        st.error(f"Failed to delete transaction: {e}")
 
 def add_category(name, cat_type, description):
     """Add a new category"""
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("""INSERT INTO category (name, type, description, is_active) 
-                 VALUES (?, ?, ?, 1)""",
-              (name, cat_type, description))
-    conn.commit()
-    conn.close()
-    clear_cache()
+    try:
+        supabase.table('category').insert({
+            'name': name,
+            'type': cat_type,
+            'description': description
+        }).execute()
+        clear_cache()
+    except Exception as e:
+        st.error(f"Failed to add category: {e}")
 
 # Navigation
 pages = ["📊 Dashboard", "📅 Meetings", "✅ Check In", "📜 History", "💰 Treasury"]
