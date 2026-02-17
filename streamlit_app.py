@@ -40,31 +40,24 @@ def check_password():
             min-height: 60vh;
         }
         .login-card {
-            background: linear-gradient(145deg, rgba(45, 74, 62, 0.85), rgba(26, 47, 35, 0.95));
-            border: 1px solid rgba(122, 158, 135, 0.3);
-            border-radius: 24px;
+            background: var(--bg-card);
+            border: 4px solid var(--text);
             padding: 3rem;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             text-align: center;
             max-width: 380px;
             width: 90%;
         }
         .login-icon {
-            font-size: 4rem;
+            font-size: 5rem;
+            display: block;
             margin-bottom: 1rem;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.9; }
         }
     </style>
     <div class="login-wrapper">
         <div class="login-card">
             <div class="login-icon">🍀</div>
-            <h2 style="border:none; margin-bottom:0.5rem;">AA Tracker</h2>
-            <p style="color:var(--text-muted); margin-bottom:2rem;">One day at a time</p>
+            <h2 style="border:none; margin-bottom:0.5rem;">AA TRACKER</h2>
+            <p style="color:var(--text-muted); margin-bottom:2rem; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.2em;">One day at a time</p>
     """, unsafe_allow_html=True)
     
     st.title("🍀 AA Tracker")
@@ -86,153 +79,208 @@ def check_password():
 if not check_password():
     st.stop()
 
-# Custom CSS - Organic Calm Aesthetic
+# Custom CSS - Brutalist Aesthetic
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Nunito+Sans:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Archivo+Black&display=swap');
     
     :root {
-        --forest-deep: #1a2f23;
-        --forest-mid: #2d4a3e;
-        --forest-light: #3d6b54;
-        --sage: #7a9e87;
-        --cream: #f5f2eb;
-        --amber: #d4a853;
-        --amber-glow: #e8c078;
-        --text-light: #f5f2eb;
-        --text-muted: #a8b5ad;
-        --danger: #c45c5c;
-        --success: #6b9e7a;
+        --bg-dark: #0a0a0a;
+        --bg-card: #141414;
+        --text: #f0f0f0;
+        --text-muted: #666;
+        --accent: #ff3e00;
+        --accent-hover: #ff6b3d;
+        --border: #333;
+        --border-light: #444;
     }
     
     .stApp {
-        background: linear-gradient(165deg, var(--forest-deep) 0%, #152419 50%, #0f1a12 100%);
-        color: var(--text-light);
-        font-family: 'Nunito Sans', sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text);
+        font-family: 'Space Mono', monospace;
         min-height: 100vh;
     }
     
-    .stApp::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        opacity: 0.03;
-        pointer-events: none;
-        z-index: 0;
+    h1, h2, h3 {
+        font-family: 'Archivo Black', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text);
     }
     
-    h1, h2, h3, .stTitle {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-        color: var(--cream);
+    h1 { 
+        font-size: 3rem; 
+        line-height: 1;
+        border: 4px solid var(--text);
+        padding: 1rem;
+        margin-bottom: 2rem;
     }
     
-    h1 { font-size: 2.5rem; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
-    h2 { font-size: 1.75rem; border-bottom: 1px solid rgba(212, 168, 83, 0.3); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+    h2 { 
+        font-size: 1.5rem; 
+        border-left: 8px solid var(--accent);
+        padding-left: 1rem;
+        margin-bottom: 1.5rem;
+    }
     
     div[data-testid="stMetric"] {
-        background: linear-gradient(145deg, rgba(45, 74, 62, 0.6), rgba(26, 47, 35, 0.8));
-        border: 1px solid rgba(122, 158, 135, 0.2);
-        border-radius: 16px;
-        padding: 1.25rem;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
     }
     
-    div[data-testid="stMetric"]:hover { transform: translateY(-2px); }
-    div[data-testid="stMetricValue"] { font-family: 'Cormorant Garamond', serif; font-size: 2.25rem; font-weight: 600; color: var(--cream); }
-    div[data-testid="stMetricLabel"] { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    div[data-testid="stMetric"]:hover {
+        border-color: var(--accent);
+    }
+    
+    div[data-testid="stMetricValue"] { 
+        font-family: 'Archivo Black', sans-serif;
+        font-size: 2.5rem; 
+        text-transform: uppercase;
+    }
+    
+    div[data-testid="stMetricLabel"] { 
+        color: var(--accent);
+        font-size: 0.75rem; 
+        letter-spacing: 0.2em;
+    }
     
     .stButton > button {
-        background: linear-gradient(145deg, var(--amber), var(--amber-glow));
-        color: var(--forest-deep);
+        background: var(--accent);
+        color: #000;
         border: none;
-        border-radius: 12px;
-        padding: 0.75rem 1.5rem;
-        font-family: 'Nunito Sans', sans-serif;
-        font-weight: 600;
-        font-size: 0.95rem;
-        box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-        transition: all 0.25s ease;
+        border-radius: 0;
+        padding: 1rem 2rem;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: all 0.1s;
     }
     
     .stButton > button:hover {
-        background: linear-gradient(145deg, var(--amber-glow), var(--amber));
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(212, 168, 83, 0.4);
+        background: var(--accent-hover);
+        transform: translate(4px, 4px);
     }
     
     .stButton > button[kind="secondary"] {
-        background: linear-gradient(145deg, var(--forest-mid), var(--forest-light));
-        color: var(--text-light);
-        border: 1px solid rgba(122, 158, 135, 0.3);
+        background: transparent;
+        color: var(--text);
+        border: 2px solid var(--border-light);
     }
     
     .stButton > button[kind="secondary"]:hover {
-        background: linear-gradient(145deg, var(--forest-light), var(--forest-mid));
+        border-color: var(--accent);
+        color: var(--accent);
     }
     
-    .stTextInput > div > div, .stNumberInput > div > div, .stSelectbox > div > div, .stDateInput > div > div {
-        background: rgba(26, 47, 35, 0.6);
-        border: 1px solid rgba(122, 158, 135, 0.3);
-        border-radius: 10px;
-        color: var(--text-light);
+    .stTextInput > div > div, .stNumberInput > div > div, 
+    .stSelectbox > div > div, .stDateInput > div > div {
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        border-radius: 0;
+        color: var(--text);
+    }
+    
+    .stTextInput > div > div:focus-within,
+    .stNumberInput > div > div:focus-within,
+    .stSelectbox > div > div:focus-within {
+        border-color: var(--accent);
     }
     
     .stRadio > div > label {
-        background: rgba(45, 74, 62, 0.4);
-        border: 1px solid rgba(122, 158, 135, 0.2);
-        border-radius: 10px;
-        padding: 0.6rem 1rem;
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        border-radius: 0;
+        padding: 0.75rem 1.25rem;
         color: var(--text-muted);
-        transition: all 0.25s ease;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+    }
+    
+    .stRadio > div > label:hover {
+        border-color: var(--border-light);
+        color: var(--text);
     }
     
     .stRadio > div > label:has(input:checked) {
-        background: linear-gradient(145deg, var(--amber), var(--amber-glow));
-        color: var(--forest-deep);
-        border-color: var(--amber);
-        font-weight: 600;
-        box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3);
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+        font-weight: 700;
     }
     
     .streamlit-expanderHeader {
-        background: rgba(45, 74, 62, 0.4);
-        border: 1px solid rgba(122, 158, 135, 0.2);
-        border-radius: 12px;
-        color: var(--cream);
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        border-radius: 0;
+        color: var(--text);
+        font-family: 'Space Mono', monospace;
+        text-transform: uppercase;
     }
     
     .stDataFrame {
-        background: rgba(26, 47, 35, 0.4);
-        border: 1px solid rgba(122, 158, 135, 0.2);
-        border-radius: 12px;
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        border-radius: 0;
     }
     
-    hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(212, 168, 83, 0.3), transparent); margin: 2rem 0; }
+    hr { 
+        border: none; 
+        height: 4px; 
+        background: var(--accent); 
+        margin: 2rem 0; 
+    }
     
-    .stSuccess { background: rgba(107, 158, 122, 0.2); border: 1px solid var(--success); border-radius: 10px; }
-    .stError { background: rgba(196, 92, 92, 0.2); border: 1px solid var(--danger); border-radius: 10px; }
+    .stSuccess, .stError {
+        border-radius: 0;
+        border: 2px solid;
+    }
+    
+    .stSuccess { 
+        background: transparent; 
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+    
+    .stError { 
+        background: transparent; 
+        border-color: #ff0000;
+        color: #ff0000;
+    }
     
     @media (max-width: 768px) {
-        h1 { font-size: 1.75rem; }
-        h2 { font-size: 1.35rem; }
+        h1 { font-size: 1.75rem; padding: 0.5rem; }
+        h2 { font-size: 1.25rem; }
         div[data-testid="stMetricValue"] { font-size: 1.5rem; }
+        .stRadio > div { flex-direction: column !important; }
+    }
+    
+    /* Login page */
+    .login-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
     }
     
     .login-card {
-        background: linear-gradient(145deg, rgba(45, 74, 62, 0.8), rgba(26, 47, 35, 0.9));
-        border: 1px solid rgba(122, 158, 135, 0.3);
-        border-radius: 24px;
+        background: var(--bg-card);
+        border: 4px solid var(--text);
         padding: 3rem;
-        backdrop-filter: blur(20px);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        max-width: 400px;
+        width: 90%;
+    }
+    
+    .login-icon {
+        font-size: 5rem;
+        display: block;
+        margin-bottom: 1rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -418,7 +466,7 @@ def add_category(name, cat_type, description):
 # Navigation
 pages = ["📊 Dashboard", "📅 Meetings", "✅ Check In", "📜 History", "💰 Treasury"]
 
-st.markdown('<h1 style="text-align:center; margin-bottom:0.5rem;">🍀 AA Tracker</h1><p style="text-align:center; color:var(--text-muted); margin-bottom:2rem;">One day at a time</p>', unsafe_allow_html=True)
+st.markdown('<h1>🍀 AA TRACKER</h1>', unsafe_allow_html=True)
 
 # Create navigation
 page = st.radio(
