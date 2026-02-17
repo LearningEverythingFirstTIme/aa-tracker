@@ -502,7 +502,7 @@ elif page == "📅 Meetings":
                         st.rerun()
                     
                     # Delete button outside form (can't have two submit buttons in one form)
-                    if st.button("🗑️ Delete Meeting", key=f"del_meeting_{m['id']}", type="danger"):
+                    if st.button("🗑️ Delete Meeting", key=f"del_meeting_{m['id']}", ):
                         delete_meeting(m['id'])
                         st.success("Meeting deleted!")
                         st.rerun()
