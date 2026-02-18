@@ -143,25 +143,16 @@ st.markdown("""
     h1 { 
         font-size: 2.5rem; 
         line-height: 1.2;
-        border: 3px solid var(--text);
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 2rem;
+        padding: 1.25rem 0;
+        margin-bottom: 1.5rem;
         position: relative;
-        background: var(--bg-card);
+        background: transparent;
+        border: none;
     }
     
     h1::before {
         content: "> ";
         color: var(--accent);
-    }
-    
-    h1::after {
-        content: "_";
-        animation: blink 1s step-end infinite;
-    }
-    
-    @keyframes blink {
-        50% { opacity: 0; }
     }
     
     h2 { 
@@ -224,6 +215,12 @@ st.markdown("""
         font-size: 0.7rem; 
         letter-spacing: 0.25em;
         text-transform: uppercase;
+    }
+    
+    /* Radio container */
+    .stRadio > div {
+        background: transparent;
+        gap: 0.5rem;
     }
     
     /* Buttons - terminal style */
