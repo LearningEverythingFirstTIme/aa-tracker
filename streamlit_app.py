@@ -55,9 +55,9 @@ def check_password():
     </style>
     <div class="login-wrapper">
         <div class="login-card">
-            <div class="login-icon">🍀</div>
-            <h2 style="border:none; margin-bottom:0.5rem;">AA TRACKER</h2>
-            <p style="color:var(--text-muted); margin-bottom:2rem; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.2em;">One day at a time</p>
+            <div class="login-icon">▣</div>
+            <h2 style="border:none; margin-bottom:0.5rem; font-family: 'JetBrains Mono', monospace;">> AA_TRACKER</h2>
+            <p style="color:var(--text-muted); margin-bottom:2rem; text-transform:uppercase; font-size:0.7rem; letter-spacing:0.25em;">// one day at a time</p>
     """, unsafe_allow_html=True)
     
     st.title("🍀 AA Tracker")
@@ -79,104 +79,191 @@ def check_password():
 if not check_password():
     st.stop()
 
-# Custom CSS - Brutalist Aesthetic
+# Custom CSS - Industrial / Terminal Aesthetic
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Archivo+Black&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
     
     :root {
-        --bg-dark: #0a0a0a;
-        --bg-card: #141414;
-        --text: #f0f0f0;
-        --text-muted: #666;
-        --accent: #ff3e00;
-        --accent-hover: #ff6b3d;
-        --border: #333;
-        --border-light: #444;
+        --bg-dark: #0d0d0d;
+        --bg-card: #161616;
+        --bg-input: #1a1a1a;
+        --text: #e8e8e8;
+        --text-dim: #888888;
+        --text-muted: #555555;
+        --accent: #00ff88;
+        --accent-dim: #00cc6a;
+        --accent-glow: rgba(0, 255, 136, 0.15);
+        --border: #2a2a2a;
+        --border-light: #3a3a3a;
+        --terminal-amber: #ffb000;
+        --terminal-red: #ff3333;
+    }
+    
+    /* Scanline effect overlay */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.03) 2px,
+            rgba(0, 0, 0, 0.03) 4px
+        );
+        pointer-events: none;
+        z-index: 9999;
     }
     
     .stApp {
         background-color: var(--bg-dark);
         color: var(--text);
-        font-family: 'Space Mono', monospace;
+        font-family: 'IBM Plex Mono', monospace;
         min-height: 100vh;
     }
     
-    h1, h2, h3 {
-        font-family: 'Archivo Black', sans-serif;
+    /* Text selection */
+    ::selection {
+        background: var(--accent);
+        color: var(--bg-dark);
+    }
+    
+    h1, h2, h3, h4 {
+        font-family: 'JetBrains Mono', monospace;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.15em;
         color: var(--text);
+        font-weight: 700;
     }
     
     h1 { 
-        font-size: 3rem; 
-        line-height: 1;
-        border: 4px solid var(--text);
-        padding: 1rem;
+        font-size: 2.5rem; 
+        line-height: 1.2;
+        border: 3px solid var(--text);
+        padding: 1.25rem 1.5rem;
         margin-bottom: 2rem;
+        position: relative;
+        background: var(--bg-card);
+    }
+    
+    h1::before {
+        content: "> ";
+        color: var(--accent);
+    }
+    
+    h1::after {
+        content: "_";
+        animation: blink 1s step-end infinite;
+    }
+    
+    @keyframes blink {
+        50% { opacity: 0; }
     }
     
     h2 { 
-        font-size: 1.5rem; 
-        border-left: 8px solid var(--accent);
+        font-size: 1.25rem; 
+        border-left: 4px solid var(--accent);
         padding-left: 1rem;
         margin-bottom: 1.5rem;
+        background: var(--bg-card);
+        padding: 0.75rem 1rem;
     }
     
+    h3 {
+        font-size: 1rem;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 0.5rem;
+    }
+    
+    /* Metrics - terminal style */
     div[data-testid="stMetric"] {
         background: var(--bg-card);
-        border: 2px solid var(--border);
-        padding: 1.5rem;
+        border: 1px solid var(--border);
+        padding: 1.25rem;
         margin-bottom: 1rem;
+        position: relative;
+    }
+    
+    div[data-testid="stMetric"]::before {
+        content: "[";
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        color: var(--border-light);
+        font-family: 'JetBrains Mono', monospace;
+    }
+    
+    div[data-testid="stMetric"]::after {
+        content: "]";
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        color: var(--border-light);
+        font-family: 'JetBrains Mono', monospace;
     }
     
     div[data-testid="stMetric"]:hover {
         border-color: var(--accent);
+        box-shadow: 0 0 20px var(--accent-glow);
     }
     
     div[data-testid="stMetricValue"] { 
-        font-family: 'Archivo Black', sans-serif;
-        font-size: 2.5rem; 
-        text-transform: uppercase;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 2rem; 
+        font-weight: 700;
+        color: var(--accent);
+        text-shadow: 0 0 10px var(--accent-glow);
     }
     
     div[data-testid="stMetricLabel"] { 
-        color: var(--accent);
-        font-size: 0.75rem; 
-        letter-spacing: 0.2em;
+        color: var(--text-dim);
+        font-size: 0.7rem; 
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
     }
     
+    /* Buttons - terminal style */
     .stButton > button {
-        background: var(--accent);
-        color: #000;
-        border: none;
+        background: transparent;
+        color: var(--accent);
+        border: 2px solid var(--accent);
         border-radius: 0;
-        padding: 1rem 2rem;
-        font-family: 'Space Mono', monospace;
+        padding: 0.75rem 1.5rem;
+        font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
-        font-size: 1rem;
+        font-size: 0.85rem;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        transition: all 0.1s;
+        letter-spacing: 0.15em;
+        transition: all 0.15s ease;
+        position: relative;
     }
     
     .stButton > button:hover {
-        background: var(--accent-hover);
-        transform: translate(4px, 4px);
+        background: var(--accent);
+        color: var(--bg-dark);
+        box-shadow: 0 0 20px var(--accent-glow);
+    }
+    
+    .stButton > button:active {
+        transform: scale(0.98);
     }
     
     .stButton > button[kind="secondary"] {
         background: transparent;
-        color: var(--text);
-        border: 2px solid var(--border-light);
+        color: var(--text-dim);
+        border: 1px solid var(--border-light);
     }
     
     .stButton > button[kind="secondary"]:hover {
-        border-color: var(--accent);
-        color: var(--accent);
+        border-color: var(--text);
+        color: var(--text);
     }
     
+    /* Input fields */
     .stTextInput > div > div, .stNumberInput > div > div, 
     .stSelectbox > div > div, .stDateInput > div > div {
         background: var(--bg-card);
@@ -271,16 +358,111 @@ st.markdown("""
     
     .login-card {
         background: var(--bg-card);
-        border: 4px solid var(--text);
+        border: 3px solid var(--accent);
         padding: 3rem;
         max-width: 400px;
         width: 90%;
+        position: relative;
+    }
+    
+    .login-card::before {
+        content: "/// AUTHENTICATE";
+        position: absolute;
+        top: -12px;
+        left: 1rem;
+        background: var(--bg-dark);
+        color: var(--accent);
+        padding: 0 0.5rem;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
     }
     
     .login-icon {
-        font-size: 5rem;
+        font-size: 4rem;
         display: block;
         margin-bottom: 1rem;
+        filter: grayscale(100%) brightness(1.5);
+    }
+    
+    /* Tables / DataFrames */
+    .stDataFrame {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+    }
+    
+    .stDataFrame thead th {
+        background: var(--bg-input) !important;
+        color: var(--accent) !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        text-transform: uppercase;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.15em;
+        border-bottom: 2px solid var(--accent) !important;
+    }
+    
+    .stDataFrame tbody td {
+        font-family: 'IBM Plex Mono', monospace !important;
+        font-size: 0.85rem !important;
+        border-bottom: 1px solid var(--border) !important;
+    }
+    
+    .stDataFrame tbody tr:hover {
+        background: var(--accent-glow) !important;
+    }
+    
+    /* Sidebar */
+    .css-1d391kg {
+        background: var(--bg-card);
+        border-right: 1px solid var(--border);
+    }
+    
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-bottom: none;
+        color: var(--text-dim);
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.15em;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: var(--accent) !important;
+        color: var(--bg-dark) !important;
+        border-color: var(--accent) !important;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: var(--bg-dark);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: var(--border-light);
+        border: 1px solid var(--bg-dark);
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-dim);
+    }
+    
+    /* Cursor blink animation for headings */
+    @keyframes cursor-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -514,7 +696,7 @@ def add_category(name, cat_type, description):
 # Navigation
 pages = ["📊 Dashboard", "📅 Meetings", "✅ Check In", "📜 History", "💰 Treasury"]
 
-st.markdown('<h1>🍀 AA TRACKER</h1>', unsafe_allow_html=True)
+st.markdown('<h1>AA_TRACKER_v2.0</h1>', unsafe_allow_html=True)
 
 # Create navigation
 page = st.radio(
