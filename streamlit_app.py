@@ -447,16 +447,33 @@ def delete_meeting(meeting_id):
 
 def add_attendance(meeting_id, date_val, role, notes):
     """Record attendance in Supabase"""
+    from datetime import date as date_type
+    
+    # Validate date is not in the future
+    check_date = date_val if isinstance(date_val, date_type) else date_type.fromisoformat(str(date_val))
+    if check_date > today:
+        st.error("Cannot check in for future dates")
+        return False
+    
+    # Check for duplicate
+    date_str = check_date.strftime('%Y-%m-%d') if hasattr(check_date, 'strftime') else str(check_date)
+    existing = supabase.table('attendance').select('id').eq('meeting_id', meeting_id).eq('date', date_str).execute()
+    if existing.data:
+        st.error("Already checked in for this meeting on this date!")
+        return False
+    
     try:
         supabase.table('attendance').insert({
             'meeting_id': meeting_id,
-            'date': date_val.strftime('%Y-%m-%d') if hasattr(date_val, 'strftime') else str(date_val),
+            'date': date_str,
             'role': role,
             'notes': notes
         }).execute()
         clear_cache()
+        return True
     except Exception as e:
         st.error(f"Failed to record attendance: {e}")
+        return False
 
 def add_transaction(date_val, amount, category_id, tx_type, description, meeting_name, notes):
     """Add treasury transaction to Supabase"""
@@ -699,9 +716,9 @@ elif page == "✅ Check In":
             submitted = st.form_submit_button("✅ Check In", width='stretch')
             
             if submitted:
-                add_attendance(meeting_id, date_val, role, notes)
-                st.success(f"Checked in to {meetings[meetings['id']==meeting_id]['name'].values[0]}!")
-                st.rerun()
+                if add_attendance(meeting_id, date_val, role, notes):
+                    st.success(f"Checked in to {meetings[meetings['id']==meeting_id]['name'].values[0]}!")
+                    st.rerun()
     else:
         st.info("No active meetings. Add one in the Meetings tab first!")
 
