@@ -23,7 +23,7 @@ st.set_page_config(
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
-APP_PASSWORD = "nick123"
+APP_PASSWORD = st.secrets.get("APP_PASSWORD", "nick123")
 
 def check_password():
     """Show login screen if not authenticated"""
@@ -286,8 +286,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Supabase configuration
-SUPABASE_URL = "https://qlkfubzlvgngbhnlecbk.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsa2Z1YnpsdmduZ2JobmxlY2JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNjU1OTksImV4cCI6MjA4Njk0MTU5OX0.M_Yi7hCCKtRLAO-11qr60FbhXK6JkXMPzRyLw5_xKAY"
+SUPABASE_URL = st.secrets.get("SUPABASE_URL", "")
+SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "")
 
 @st.cache_resource
 def get_supabase_client():
@@ -557,16 +557,25 @@ if page == "📊 Dashboard":
                     'format': m['format_type']
                 })
     
+    # Meetings attended this week
+    week_start = today - timedelta(days=today.weekday())
+    this_week_attendance = attendance[pd.to_datetime(attendance['date']).dt.date >= week_start]
+    meetings_this_week = len(this_week_attendance)
+    
+    # Total check-ins (all time)
+    total_checkins = len(attendance)
+    
     # Metrics
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("📅 Attendance Streak", f"{streak} days")
     with col2:
         st.metric("💰 Treasury Balance", f"${balance:,.2f}")
     with col3:
-        st.metric("📅 Meetings This Week", len(this_week_meetings))
-    with col4:
-        st.metric("👥 Total Members", attendance['role'].count())
+        st.metric("📅 Attended This Week", meetings_this_week)
+    
+    # Secondary metrics
+    st.metric("✓ Total Check-ins", total_checkins)
     
     # This week's meetings
     st.markdown("---")
