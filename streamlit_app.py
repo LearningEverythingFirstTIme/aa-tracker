@@ -23,12 +23,33 @@ st.set_page_config(
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
-APP_PASSWORD = st.secrets.get("APP_PASSWORD", "nick123")
+# Security: Fail loudly if password is not configured
+if "APP_PASSWORD" not in st.secrets:
+    st.error("🔴 FATAL: APP_PASSWORD not configured in secrets.toml!")
+    st.stop()
+APP_PASSWORD = st.secrets["APP_PASSWORD"]
 
 def check_password():
     """Show login screen if not authenticated"""
     if st.session_state.authenticated:
         return True
+    
+    # Initialize rate limiting
+    if 'login_attempts' not in st.session_state:
+        st.session_state.login_attempts = 0
+    if 'login_lockout_until' not in st.session_state:
+        st.session_state.login_lockout_until = None
+    
+    # Check if locked out
+    if st.session_state.login_lockout_until:
+        if datetime.now() < st.session_state.login_lockout_until:
+            remaining = (st.session_state.login_lockout_until - datetime.now()).seconds
+            st.error(f"🔒 Too many failed attempts. Try again in {remaining} seconds.")
+            return False
+        else:
+            # Lockout expired, reset
+            st.session_state.login_attempts = 0
+            st.session_state.login_lockout_until = None
     
     st.markdown("""
     <style>
@@ -68,12 +89,19 @@ def check_password():
     if st.button("Login"):
         if password == APP_PASSWORD:
             st.session_state.authenticated = True
+            st.session_state.login_attempts = 0  # Reset on success
             st.rerun()
         else:
-            st.error("Incorrect password. Please try again.")
+            st.session_state.login_attempts += 1
+            if st.session_state.login_attempts >= 3:
+                # Lock out for 30 seconds after 3 failures
+                st.session_state.login_lockout_until = datetime.now() + timedelta(seconds=30)
+                st.error("Too many failed attempts. Locked out for 30 seconds.")
+            else:
+                st.error(f"Incorrect password. {3 - st.session_state.login_attempts} attempts remaining.")
     
     st.markdown("---")
-    st.caption("Contact Nick if you forgot your password")
+    st.caption("Contact the administrator if you forgot your password")
     return False
 
 if not check_password():
@@ -405,9 +433,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Supabase configuration
+# Supabase configuration - fail loudly if not configured
 SUPABASE_URL = st.secrets.get("SUPABASE_URL", "")
 SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "")
+
+# Validate Supabase credentials
+if not SUPABASE_URL or not SUPABASE_KEY:
+    st.error("🔴 FATAL: SUPABASE_URL or SUPABASE_KEY not configured in secrets.toml!")
+    st.stop()
 
 @st.cache_resource
 def get_supabase_client():
@@ -526,6 +559,11 @@ def get_monthly_summary(year=None, month=None):
 # Database operations
 def add_meeting(name, day_of_week, time, location, format_type, is_treasurer_duty, notes):
     """Add a new meeting to Supabase"""
+    # Input validation
+    name = (name or "").strip()[:100]
+    location = (location or "").strip()[:200]
+    notes = (notes or "").strip()[:500]
+    
     try:
         supabase.table('meeting').insert({
             'name': name,
@@ -542,6 +580,11 @@ def add_meeting(name, day_of_week, time, location, format_type, is_treasurer_dut
 
 def update_meeting(meeting_id, name, day_of_week, time, location, format_type, is_treasurer_duty, notes, is_active):
     """Update a meeting in Supabase"""
+    # Input validation
+    name = (name or "").strip()[:100]
+    location = (location or "").strip()[:200]
+    notes = (notes or "").strip()[:500]
+    
     try:
         supabase.table('meeting').update({
             'name': name,
@@ -569,9 +612,15 @@ def add_attendance(meeting_id, date_val, role, notes):
     """Record attendance in Supabase"""
     from datetime import date as date_type
     
+    # Input validation
+    notes = (notes or "").strip()[:500]
+    
+    # Get today's date inside function to avoid scope issues
+    today_local = date.today()
+    
     # Validate date is not in the future
     check_date = date_val if isinstance(date_val, date_type) else date_type.fromisoformat(str(date_val))
-    if check_date > today:
+    if check_date > today_local:
         st.error("Cannot check in for future dates")
         return False
     
@@ -597,6 +646,11 @@ def add_attendance(meeting_id, date_val, role, notes):
 
 def add_transaction(date_val, amount, category_id, tx_type, description, meeting_name, notes):
     """Add treasury transaction to Supabase"""
+    # Input validation
+    description = (description or "").strip()[:200]
+    meeting_name = (meeting_name or "").strip()[:100]
+    notes = (notes or "").strip()[:500]
+    
     try:
         supabase.table('transaction').insert({
             'date': date_val.strftime('%Y-%m-%d') if hasattr(date_val, 'strftime') else str(date_val),
@@ -621,6 +675,10 @@ def delete_transaction(tx_id):
 
 def add_category(name, cat_type, description):
     """Add a new category"""
+    # Input validation
+    name = (name or "").strip()[:50]
+    description = (description or "").strip()[:200]
+    
     try:
         supabase.table('category').insert({
             'name': name,
@@ -678,7 +736,9 @@ if page == "📊 Dashboard":
                     streak += 1
                     check_date = d_date
                 else:
-                    break
+                    # If we already have a streak and this date breaks it, stop counting
+                    if streak > 0:
+                        break
     
     # Upcoming meetings this week
     this_week_meetings = []
@@ -696,7 +756,10 @@ if page == "📊 Dashboard":
     
     # Meetings attended this week
     week_start = today - timedelta(days=today.weekday())
-    this_week_attendance = attendance[pd.to_datetime(attendance['date']).dt.date >= week_start]
+    try:
+        this_week_attendance = attendance[pd.to_datetime(attendance['date'], errors='coerce').dt.date >= week_start] if not attendance.empty else pd.DataFrame()
+    except Exception:
+        this_week_attendance = pd.DataFrame()
     meetings_this_week = len(this_week_attendance)
     
     # Total check-ins (all time)
@@ -970,8 +1033,8 @@ elif page == "💰 Treasury":
                 with col1:
                     st.write(f"**Amount:** ${row['amount']:,.2f}")
                     st.write(f"**Type:** {row['type']}")
-                    if row['category']:
-                        st.write(f"**Category:** {row['category']}")
+                    if row.get('category_name'):
+                        st.write(f"**Category:** {row['category_name']}")
                     if row['description']:
                         st.write(f"**Description:** {row['description']}")
                     if row['meeting_name']:
